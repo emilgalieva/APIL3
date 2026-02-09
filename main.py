@@ -27,10 +27,13 @@ class MainWindow(arcade.Window):
 
     def update_scale(self, is_positive, delta_time):
         scale = self.static_map_params["spn"].split(",")
-        self.static_map_params["spn"] = ",".join([
-            str(ael) if 0.0001 < ael < 360.0 else scale[i]
-            for i, ael in enumerate((float(el) + (SCALE_SENSITIVITY * delta_time * (1 if is_positive else -1))
-                                     for el in scale))])
+        result = float(scale[0]) + SCALE_SENSITIVITY * delta_time * (1 if is_positive else -1)
+        if 0.0 <= result <= 180.0:
+            scale[0] = str(result)
+        result = float(scale[1]) + SCALE_SENSITIVITY * delta_time * (1 if is_positive else -1)
+        if 0.0 <= result <= 180.0:
+            scale[1] = str(result)
+        self.static_map_params["spn"] = ",".join(scale)
         self.image_changed = True
 
     def update_ll_pos(self, direction: int):
@@ -38,11 +41,11 @@ class MainWindow(arcade.Window):
         ll = self.static_map_params["ll"].split(",")
         if direction < 2:
             result = float(ll[0]) + float(spn[0]) * (1 if direction == 1 else -1)
-            if -180.0 <= result <= 180.0:
+            if -180.0 + float(spn[0]) / 2 <= result <= 180.0 - float(spn[0]) / 2:
                 ll[0] = str(result)
         else:
             result = float(ll[1]) + float(spn[1]) * (1 if direction == 3 else -1)
-            if -90.0 <= result <= 90.0:
+            if -90.0 + float(spn[1]) / 2 <= result <= 90.0 - float(spn[1]) / 2:
                 ll[1] = str(result)
         self.static_map_params["ll"] = ",".join(ll)
         self.image_changed = True
